@@ -1,0 +1,42 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: notes-vault-postgres
+    environment:
+      POSTGRES_USER: notesvault
+      POSTGRES_PASSWORD: notesvault
+      POSTGRES_DB: notesvault
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U notesvault -d notesvault"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - notesvault-data:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: notes-vault:latest
+    container_name: notes-vault-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: jdbc:postgresql://postgres:5432/notesvault
+      DATABASE_USERNAME: notesvault
+      DATABASE_PASSWORD: notesvault
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/actuator/health/readiness || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  notesvault-data:

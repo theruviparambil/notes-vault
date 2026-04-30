@@ -1,0 +1,13 @@
+target/
+.git/
+.idea/
+.vscode/
+*.iml
+*.iws
+.DS_Store
+.gradle/
+build/
+README.md
+docs/
+.github/
+.mvn/wrapper/maven-wrapper.jar
